@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#020617" />
+  <title>Cyber Arena — Classroom Wargame</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">CA</div>
+        <div>
+          <strong>CYBER ARENA</strong>
+          <small>Closed Classroom Simulation</small>
+        </div>
+      </div>
+      <div class="status-strip">
+        <span id="connectionState" class="status offline">OFFLINE</span>
+        <span id="roomBadge" class="pill hidden">ROOM —</span>
+        <button id="logoutBtn" class="btn ghost hidden">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="authScreen" class="screen active">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="kicker">DEFEND • ANALYZE • LEARN</p>
+            <h1>Classroom cyber battles without touching the real network.</h1>
+            <p>Students attack fictional nodes, solve server-validated security puzzles, patch defenses, duel bots and compete in teams.</p>
+            <div class="feature-chips">
+              <span>Classic Lab</span><span>1v1 Duel</span><span>Team vs Team</span><span>AI Bots</span><span>Z-Shield Mentor</span>
+            </div>
+          </div>
+
+          <div class="auth-panel panel">
+            <div class="tabs">
+              <button id="loginTab" class="tab active">Login</button>
+              <button id="signupTab" class="tab">Sign up</button>
+            </div>
+            <form id="authForm">
+              <label>Username<input id="username" maxlength="32" autocomplete="username" required /></label>
+              <label>Password<input id="password" type="password" minlength="10" maxlength="128" autocomplete="current-password" required /></label>
+              <button id="authSubmit" class="btn primary full" type="submit">ENTER ARENA</button>
+              <p id="authError" class="error"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="homeScreen" class="screen">
+        <div class="home-grid">
+          <section class="panel command-panel">
+            <p class="kicker">MISSION CONTROL</p>
+            <h2>Start or join a classroom match</h2>
+
+            <div class="mode-grid">
+              <button class="mode-card active" data-mode="classic">
+                <strong>CLASSIC LAB</strong><span>Free-for-all learning and XP</span>
+              </button>
+              <button class="mode-card" data-mode="duel">
+                <strong>DUEL</strong><span>1v1 shield battle, human or bot</span>
+              </button>
+              <button class="mode-card" data-mode="teams">
+                <strong>TEAM VS TEAM</strong><span>Red Team vs Blue Team</span>
+              </button>
+            </div>
+
+            <div class="split">
+              <div>
+                <label>Room name<input id="roomName" value="Cyber Lab" maxlength="80" /></label>
+                <label>Player handle<input id="playerHandle" maxlength="24" placeholder="GhostSEC" /></label>
+                <button id="createRoomBtn" class="btn primary full">CREATE MATCH</button>
+              </div>
+              <div class="join-box">
+                <label>Room code<input id="joinCode" maxlength="6" placeholder="ABC123" /></label>
+                <label>Player handle<input id="joinHandle" maxlength="24" placeholder="AlphaByte" /></label>
+                <button id="joinRoomBtn" class="btn secondary full">JOIN MATCH</button>
+              </div>
+            </div>
+            <p id="homeError" class="error"></p>
+          </section>
+
+          <aside class="panel">
+            <p class="kicker">SAFETY MODEL</p>
+            <h3>Simulation only</h3>
+            <ul class="safe-list">
+              <li>No LAN or internet target scanning</li>
+              <li>No operating-system shell execution</li>
+              <li>No real exploit payloads</li>
+              <li>All scoring and validation is server-side</li>
+              <li>AI content is constrained to fictional services</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section id="roomScreen" class="screen">
+        <div class="arena-layout">
+          <aside class="panel peers-panel">
+            <div class="panel-heading">
+              <div><p class="kicker">PEER NETWORK</p><h3 id="roomTitle">Room</h3></div>
+              <span id="modeBadge" class="pill">CLASSIC</span>
+            </div>
+
+            <div id="teamHealth" class="team-health hidden">
+              <div><span>RED</span><div class="bar"><i id="redHealth"></i></div><strong id="redHealthText">100</strong></div>
+              <div><span>BLUE</span><div class="bar"><i id="blueHealth"></i></div><strong id="blueHealthText">100</strong></div>
+            </div>
+
+            <div id="peerList" class="peer-list"></div>
+
+            <div id="instructorControls" class="instructor-box hidden">
+              <p class="kicker">INSTRUCTOR</p>
+              <div class="inline">
+                <select id="botCount"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+                <button id="addBotsBtn" class="btn secondary">ADD BOTS</button>
+              </div>
+              <button id="startMatchBtn" class="btn primary full">START MATCH</button>
+            </div>
+          </aside>
+
+          <section class="terminal panel">
+            <div class="terminal-head">
+              <div>
+                <p class="kicker">INTERACTIVE EMULATOR</p>
+                <strong id="terminalContext">Select a peer to scan</strong>
+              </div>
+              <div class="shield-readout">SHIELD <strong id="shieldValue">100%</strong></div>
+            </div>
+
+            <div id="terminalLog" class="terminal-log" aria-live="polite">
+              <div class="line system">Cyber Arena simulator ready.</div>
+              <div class="line muted">Only synthetic classroom nodes are available.</div>
+            </div>
+
+            <form id="terminalForm" class="terminal-form">
+              <span>&gt;</span>
+              <input id="terminalInput" autocomplete="off" placeholder="help" />
+              <button class="btn primary" type="submit">RUN</button>
+            </form>
+
+            <div id="challengeBox" class="challenge hidden">
+              <p class="kicker">ACTIVE CHALLENGE</p>
+              <h3 id="challengeTitle"></h3>
+              <p id="challengeDescription"></p>
+              <div class="challenge-meta">
+                <span id="challengeService"></span>
+                <span id="challengePort"></span>
+              </div>
+              <pre id="challengePrompt"></pre>
+              <form id="answerForm" class="answer-form">
+                <input id="answerInput" placeholder="Submit simulator answer" autocomplete="off" />
+                <button class="btn primary" type="submit">VERIFY</button>
+              </form>
+              <button id="hintBtn" class="btn ghost">ASK Z-SHIELD FOR A HINT</button>
+              <div id="hintOutput" class="hint-output hidden"></div>
+            </div>
+          </section>
+
+          <aside class="right-column">
+            <section class="panel">
+              <div class="panel-heading"><p class="kicker">LEADERBOARD</p><span id="playerCount" class="pill">0</span></div>
+              <div id="leaderboard" class="leaderboard"></div>
+            </section>
+
+            <section class="panel defense">
+              <p class="kicker">DEFENSE MATRIX</p>
+              <div class="shield-ring"><strong id="defenseShield">100</strong><span>%</span></div>
+              <button id="patchBtn" class="btn secondary full">COMPILE SYSTEM PATCH</button>
+              <p class="muted small">Patching costs XP but restores shield integrity.</p>
+            </section>
+          </aside>
+
+          <section class="panel feed-panel">
+            <div class="panel-heading"><p class="kicker">LIVE CLASSROOM FEED</p><span class="pulse-dot"></span></div>
+            <div id="liveFeed" class="feed"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
