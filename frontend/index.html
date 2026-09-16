@@ -4,190 +4,376 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#020617" />
-  <title>Cyber Arena — Classroom Wargame</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="color-scheme" content="dark" />
+  <title>Cyber Arena — Classroom Simulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
+  <canvas id="cyberBg" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+
   <div id="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">CA</div>
-        <div>
-          <strong>CYBER ARENA</strong>
-          <small>Closed Classroom Simulation</small>
+    <header id="topbar" class="topbar hidden">
+      <button id="brandHomeBtn" class="brand-button" type="button" aria-label="Go to Cyber Command Center">
+        <span class="brand-mark">CA</span>
+        <span class="brand-copy"><strong>CYBER ARENA</strong><small>Closed Classroom Simulation</small></span>
+      </button>
+
+      <div class="operator-strip">
+        <div id="headerProfile" class="header-profile hidden">
+          <span id="headerHandle">OPERATOR</span>
+          <b id="headerLevel">LVL 1</b>
+          <small id="headerRank">SCRIPT KIDDIE</small>
         </div>
-      </div>
-      <div class="status-strip">
-        <span id="connectionState" class="status offline">OFFLINE</span>
+        <span id="connectionState" class="status offline"><i></i>OFFLINE</span>
         <span id="roomBadge" class="pill hidden">ROOM —</span>
-        <button id="logoutBtn" class="btn ghost hidden">Logout</button>
+        <button id="soundBtn" class="icon-btn" type="button" aria-label="Toggle sound" title="Sound">♪</button>
+        <button id="helpBtn" class="icon-btn" type="button" aria-label="Open command guide" title="Command guide">?</button>
+        <button id="logoutBtn" class="btn ghost hidden" type="button">LOGOUT</button>
       </div>
     </header>
 
     <main>
-      <section id="authScreen" class="screen active">
-        <div class="hero-grid">
-          <div class="hero-copy">
-            <p class="kicker">DEFEND • ANALYZE • LEARN</p>
-            <h1>Classroom cyber battles without touching the real network.</h1>
-            <p>Students attack fictional nodes, solve server-validated security puzzles, patch defenses, duel bots and compete in teams.</p>
-            <div class="feature-chips">
-              <span>Classic Lab</span><span>1v1 Duel</span><span>Team vs Team</span><span>AI Bots</span><span>Z-Shield Mentor</span>
+      <section id="authScreen" class="screen active auth-screen">
+        <div class="auth-grid">
+          <div class="auth-hero">
+            <div class="auth-emblem" aria-hidden="true">
+              <div class="emblem-ring r1"></div><div class="emblem-ring r2"></div><div class="emblem-core">CA</div>
             </div>
+            <p class="kicker">DEFEND • ANALYZE • LEARN</p>
+            <h1 class="glitch-title" data-text="CYBER ARENA">CYBER ARENA</h1>
+            <p class="hero-lead">Enter a living cyber operations simulation built for classroom competition, logic, defense, and safe synthetic challenges.</p>
+            <div class="auth-features">
+              <span>◈ QUICK MATCH</span><span>◈ AI OPERATORS</span><span>◈ 1V1 DUELS</span><span>◈ TEAM BATTLES</span><span>◈ Z-SHIELD</span>
+            </div>
+            <div class="safety-line"><i></i> SIMULATED NODES ONLY — NO REAL NETWORK SCANNING</div>
           </div>
 
-          <div class="auth-panel panel">
-            <div class="tabs">
-              <button id="loginTab" class="tab active">Login</button>
-              <button id="signupTab" class="tab">Sign up</button>
+          <div class="access-console hud-panel">
+            <div class="panel-corners" aria-hidden="true"></div>
+            <div class="access-head">
+              <span class="eyebrow">SECURE ACCESS TERMINAL</span>
+              <span class="access-led"><i></i> READY</span>
             </div>
-            <form id="authForm">
-              <label>Username<input id="username" maxlength="32" autocomplete="username" required /></label>
-              <label>Password<input id="password" type="password" minlength="10" maxlength="128" autocomplete="current-password" required /></label>
-              <button id="authSubmit" class="btn primary full" type="submit">ENTER ARENA</button>
-              <p id="authError" class="error"></p>
+            <div class="tabs" role="tablist">
+              <button id="loginTab" class="tab active" type="button" role="tab">LOGIN</button>
+              <button id="signupTab" class="tab" type="button" role="tab">NEW ID</button>
+            </div>
+            <form id="authForm" autocomplete="on">
+              <label><span>IDENTITY / USERNAME</span><input id="username" maxlength="32" autocomplete="username" placeholder="operator_id" required /></label>
+              <label><span>ACCESS KEY / PASSWORD</span><input id="password" type="password" minlength="10" maxlength="128" autocomplete="current-password" placeholder="••••••••••" required /></label>
+              <button id="authSubmit" class="btn primary full auth-submit" type="submit"><span>AUTHENTICATE</span></button>
+              <div id="authProgress" class="auth-progress hidden" aria-live="polite"></div>
+              <p id="authError" class="error" aria-live="polite"></p>
             </form>
           </div>
         </div>
       </section>
 
-      <section id="homeScreen" class="screen">
-        <div class="home-grid">
-          <section class="panel command-panel">
-            <p class="kicker">MISSION CONTROL</p>
-            <h2>Start or join a classroom match</h2>
-
-            <div class="mode-grid">
-              <button class="mode-card active" data-mode="classic">
-                <strong>CLASSIC LAB</strong><span>Free-for-all learning and XP</span>
-              </button>
-              <button class="mode-card" data-mode="duel">
-                <strong>DUEL</strong><span>1v1 shield battle, human or bot</span>
-              </button>
-              <button class="mode-card" data-mode="teams">
-                <strong>TEAM VS TEAM</strong><span>Red Team vs Blue Team</span>
-              </button>
+      <section id="commandScreen" class="screen command-screen">
+        <div class="command-shell">
+          <section class="command-header">
+            <div>
+              <p class="kicker">CYBER COMMAND CENTER</p>
+              <h2>Welcome back, <span id="welcomeHandle">Operator</span>.</h2>
+              <p id="welcomeSubtitle" class="muted">Choose a protocol. Private rooms are optional.</p>
             </div>
-
-            <div class="split">
-              <div>
-                <label>Room name<input id="roomName" value="Cyber Lab" maxlength="80" /></label>
-                <label>Player handle<input id="playerHandle" maxlength="24" placeholder="GhostSEC" /></label>
-                <button id="createRoomBtn" class="btn primary full">CREATE MATCH</button>
-              </div>
-              <div class="join-box">
-                <label>Room code<input id="joinCode" maxlength="6" placeholder="ABC123" /></label>
-                <label>Player handle<input id="joinHandle" maxlength="24" placeholder="AlphaByte" /></label>
-                <button id="joinRoomBtn" class="btn secondary full">JOIN MATCH</button>
-              </div>
+            <div class="level-card hud-panel compact">
+              <div class="level-top"><span id="commandLevel">LEVEL 1</span><strong id="commandRank">SCRIPT KIDDIE</strong></div>
+              <div class="xp-track"><i id="commandXpBar"></i></div>
+              <div class="level-foot"><span id="commandXpText">0 / 500 XP</span><span id="commandTotalXp">0 TOTAL</span></div>
             </div>
-            <p id="homeError" class="error"></p>
           </section>
 
-          <aside class="panel">
-            <p class="kicker">SAFETY MODEL</p>
-            <h3>Simulation only</h3>
-            <ul class="safe-list">
-              <li>No LAN or internet target scanning</li>
-              <li>No operating-system shell execution</li>
-              <li>No real exploit payloads</li>
-              <li>All scoring and validation is server-side</li>
-              <li>AI content is constrained to fictional services</li>
-            </ul>
-          </aside>
+          <div class="command-grid">
+            <section class="protocols">
+              <button id="quickMatchBtn" class="protocol-card featured" type="button">
+                <span class="protocol-icon">⌁</span><span class="protocol-copy"><b>QUICK MATCH</b><small>Find human operators; add bots only when needed.</small></span><span class="protocol-arrow">→</span>
+              </button>
+              <button id="botsMatchBtn" class="protocol-card" type="button">
+                <span class="protocol-icon">AI</span><span class="protocol-copy"><b>PLAY VS BOTS</b><small>Configure difficulty, mode, and AI operator count.</small></span><span class="protocol-arrow">→</span>
+              </button>
+              <button id="duelMatchBtn" class="protocol-card" type="button">
+                <span class="protocol-icon">1V1</span><span class="protocol-copy"><b>DUEL</b><small>Queue for a human rival, then choose an AI fallback.</small></span><span class="protocol-arrow">→</span>
+              </button>
+              <button id="teamMatchBtn" class="protocol-card" type="button">
+                <span class="protocol-icon">2×2</span><span class="protocol-copy"><b>TEAM BATTLE</b><small>Balanced Red vs Blue matchmaking.</small></span><span class="protocol-arrow">→</span>
+              </button>
+              <button id="soloTrainingBtn" class="protocol-card" type="button">
+                <span class="protocol-icon">◎</span><span class="protocol-copy"><b>SOLO TRAINING</b><small>Three simulated training nodes. No room code.</small></span><span class="protocol-arrow">→</span>
+              </button>
+              <button id="privateMatchBtn" class="protocol-card" type="button">
+                <span class="protocol-icon">#</span><span class="protocol-copy"><b>PRIVATE MATCH</b><small>Create a class room or join with a six-character code.</small></span><span class="protocol-arrow">→</span>
+              </button>
+            </section>
+
+            <aside class="command-sidebar">
+              <section class="hud-panel profile-summary">
+                <div class="panel-title"><span>OPERATOR PROFILE</span><button id="profileBtn" class="text-btn" type="button">OPEN</button></div>
+                <div class="profile-orb"><span id="profileOrbLevel">01</span></div>
+                <strong id="profileSummaryHandle">Operator</strong>
+                <small id="profileSummaryRank">SCRIPT KIDDIE</small>
+                <div class="mini-stats">
+                  <div><b id="statWins">0</b><span>WINS</span></div>
+                  <div><b id="statMatches">0</b><span>MATCHES</span></div>
+                  <div><b id="statSolved">0</b><span>SOLVED</span></div>
+                  <div><b id="statStreak">0</b><span>BEST STREAK</span></div>
+                </div>
+              </section>
+
+              <section class="hud-panel quick-links">
+                <button id="achievementsBtn" class="link-row" type="button"><span>ACHIEVEMENTS</span><b id="achievementCount">0</b></button>
+                <button id="tutorialBtn" class="link-row" type="button"><span>REPLAY TRAINING</span><b>→</b></button>
+                <button id="historyBtn" class="link-row" type="button"><span>MATCH HISTORY</span><b>→</b></button>
+              </section>
+
+              <section class="hud-panel recent-ops">
+                <div class="panel-title"><span>RECENT OPERATIONS</span></div>
+                <div id="recentMatches" class="recent-list"><div class="empty-state">No completed matches yet.</div></div>
+              </section>
+            </aside>
+          </div>
         </div>
       </section>
 
-      <section id="roomScreen" class="screen">
+      <section id="roomScreen" class="screen room-screen">
+        <div class="match-header hud-panel">
+          <div>
+            <p class="kicker" id="matchProtocolLabel">ACTIVE PROTOCOL</p>
+            <h2 id="roomTitle">Cyber Arena</h2>
+          </div>
+          <div class="match-meta">
+            <span id="modeBadge" class="pill">CLASSIC</span>
+            <span id="matchStateBadge" class="pill state">LOBBY</span>
+            <span id="matchTimer" class="pill mono">00:00</span>
+          </div>
+          <button id="leaveViewBtn" class="btn ghost" type="button">COMMAND CENTER</button>
+        </div>
+
         <div class="arena-layout">
-          <aside class="panel peers-panel">
-            <div class="panel-heading">
-              <div><p class="kicker">PEER NETWORK</p><h3 id="roomTitle">Room</h3></div>
-              <span id="modeBadge" class="pill">CLASSIC</span>
-            </div>
-
-            <div id="teamHealth" class="team-health hidden">
-              <div><span>RED</span><div class="bar"><i id="redHealth"></i></div><strong id="redHealthText">100</strong></div>
-              <div><span>BLUE</span><div class="bar"><i id="blueHealth"></i></div><strong id="blueHealthText">100</strong></div>
-            </div>
-
-            <div id="peerList" class="peer-list"></div>
-
-            <div id="instructorControls" class="instructor-box hidden">
-              <p class="kicker">INSTRUCTOR</p>
-              <div class="inline">
-                <select id="botCount"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
-                <button id="addBotsBtn" class="btn secondary">ADD BOTS</button>
+          <aside class="left-stack">
+            <section class="hud-panel network-panel">
+              <div class="panel-title"><span>NETWORK TOPOLOGY</span><span id="playerCount" class="pill">0 NODES</span></div>
+              <div class="network-map-wrap">
+                <svg id="networkMap" viewBox="0 0 600 420" role="img" aria-label="Synthetic classroom network map"></svg>
+                <div class="network-radar" aria-hidden="true"></div>
               </div>
-              <button id="startMatchBtn" class="btn primary full">START MATCH</button>
-            </div>
+              <div id="nodeInspector" class="node-inspector">
+                <span class="muted">SELECT A SYNTHETIC NODE</span>
+              </div>
+            </section>
+
+            <section id="instructorControls" class="hud-panel instructor-box hidden">
+              <div class="panel-title"><span>INSTRUCTOR CONTROL</span><span class="pill">PRIVATE</span></div>
+              <div class="control-grid">
+                <label><span>BOTS</span><select id="botCount"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></label>
+                <label><span>DIFFICULTY</span><select id="lobbyBotDifficulty"><option value="rookie">ROOKIE</option><option value="standard" selected>STANDARD</option><option value="advanced">ADVANCED</option><option value="elite">ELITE</option><option value="nightmare">NIGHTMARE</option></select></label>
+              </div>
+              <button id="addBotsBtn" class="btn secondary full" type="button">ADD TRAINING BOTS</button>
+              <button id="startMatchBtn" class="btn primary full" type="button">START PROTOCOL</button>
+            </section>
           </aside>
 
-          <section class="terminal panel">
+          <section class="terminal-shell hud-panel">
             <div class="terminal-head">
-              <div>
-                <p class="kicker">INTERACTIVE EMULATOR</p>
-                <strong id="terminalContext">Select a peer to scan</strong>
-              </div>
-              <div class="shield-readout">SHIELD <strong id="shieldValue">100%</strong></div>
+              <div><p class="kicker">INTERACTIVE EMULATOR</p><strong id="terminalContext">Awaiting operator input</strong></div>
+              <div class="terminal-status"><span>SHIELD <b id="shieldValue">100%</b></span><span>STREAK <b id="streakValue">0</b></span></div>
             </div>
 
             <div id="terminalLog" class="terminal-log" aria-live="polite">
-              <div class="line system">Cyber Arena simulator ready.</div>
-              <div class="line muted">Only synthetic classroom nodes are available.</div>
+              <div class="line system">[SYS] Cyber Arena simulator ready.</div>
+              <div class="line muted">[SAFE] Synthetic classroom nodes only. Type <b>help</b> for commands.</div>
             </div>
 
+            <div id="commandSuggestions" class="command-suggestions"></div>
             <form id="terminalForm" class="terminal-form">
-              <span>&gt;</span>
-              <input id="terminalInput" autocomplete="off" placeholder="help" />
+              <span class="prompt">operator@arena:~$</span>
+              <input id="terminalInput" autocomplete="off" spellcheck="false" placeholder="help" aria-label="Simulator command" />
               <button class="btn primary" type="submit">RUN</button>
             </form>
 
             <div id="challengeBox" class="challenge hidden">
-              <p class="kicker">ACTIVE CHALLENGE</p>
-              <h3 id="challengeTitle"></h3>
+              <div class="challenge-header"><div><p class="kicker">ACTIVE CHALLENGE</p><h3 id="challengeTitle"></h3></div><span id="challengeType" class="pill"></span></div>
               <p id="challengeDescription"></p>
-              <div class="challenge-meta">
-                <span id="challengeService"></span>
-                <span id="challengePort"></span>
-              </div>
+              <div class="challenge-meta"><span id="challengeService"></span><span id="challengePort"></span><span>SIMULATED NODE</span></div>
               <pre id="challengePrompt"></pre>
               <form id="answerForm" class="answer-form">
                 <input id="answerInput" placeholder="Submit simulator answer" autocomplete="off" />
                 <button class="btn primary" type="submit">VERIFY</button>
               </form>
-              <button id="hintBtn" class="btn ghost">ASK Z-SHIELD FOR A HINT</button>
+              <div class="challenge-actions">
+                <button id="hintBtn" class="btn ghost" type="button">◉ ASK Z-SHIELD</button>
+                <button id="closeChallengeBtn" class="btn ghost" type="button">MINIMIZE</button>
+              </div>
               <div id="hintOutput" class="hint-output hidden"></div>
             </div>
           </section>
 
-          <aside class="right-column">
-            <section class="panel">
-              <div class="panel-heading"><p class="kicker">LEADERBOARD</p><span id="playerCount" class="pill">0</span></div>
+          <aside class="right-stack">
+            <section class="hud-panel scoreboard-panel">
+              <div class="panel-title"><span>LEADERBOARD</span><div id="leaderboardToggle" class="tiny-toggle hidden"><button class="active" data-board="individual" type="button">INDIVIDUAL</button><button data-board="team" type="button">TEAM</button></div></div>
               <div id="leaderboard" class="leaderboard"></div>
             </section>
 
-            <section class="panel defense">
-              <p class="kicker">DEFENSE MATRIX</p>
-              <div class="shield-ring"><strong id="defenseShield">100</strong><span>%</span></div>
-              <button id="patchBtn" class="btn secondary full">COMPILE SYSTEM PATCH</button>
-              <p class="muted small">Patching costs XP but restores shield integrity.</p>
+            <section class="hud-panel defense-panel">
+              <div class="panel-title"><span>DEFENSE MATRIX</span></div>
+              <div class="shield-visual"><svg viewBox="0 0 120 120"><circle class="shield-bg" cx="60" cy="60" r="48"></circle><circle id="shieldArc" class="shield-arc" cx="60" cy="60" r="48"></circle></svg><div><strong id="defenseShield">100</strong><span>%</span></div></div>
+              <button id="patchBtn" class="btn secondary full" type="button">COMPILE PATCH · 50 XP</button>
+              <small class="muted">Restores shield integrity. Team mode also restores team integrity.</small>
+            </section>
+
+            <section id="teamHealth" class="hud-panel team-panel hidden">
+              <div class="panel-title"><span>TEAM INTEGRITY</span></div>
+              <div class="team-meter red"><span>RED</span><div><i id="redHealth"></i></div><b id="redHealthText">100</b></div>
+              <div class="team-meter blue"><span>BLUE</span><div><i id="blueHealth"></i></div><b id="blueHealthText">100</b></div>
             </section>
           </aside>
 
-          <section class="panel feed-panel">
-            <div class="panel-heading"><p class="kicker">LIVE CLASSROOM FEED</p><span class="pulse-dot"></span></div>
+          <section class="hud-panel feed-panel">
+            <div class="panel-title"><span>LIVE CLASSROOM FEED</span><span class="live-indicator"><i></i>LIVE</span></div>
             <div id="liveFeed" class="feed"></div>
           </section>
         </div>
+
+        <button id="zShieldFab" class="z-fab" type="button"><span>◉</span> Z-SHIELD</button>
       </section>
     </main>
 
-    <div id="toast" class="toast hidden"></div>
+    <div id="onboardingOverlay" class="overlay cinematic hidden" role="dialog" aria-modal="true">
+      <div class="training-console">
+        <div class="training-head"><span>OPERATOR TRAINING PROTOCOL</span><span id="trainingStepLabel">01 / 10</span></div>
+        <div id="trainingContent" class="training-content"></div>
+        <div class="training-progress"><i id="trainingProgress"></i></div>
+        <div class="training-actions"><button id="skipTrainingBtn" class="btn ghost" type="button">SKIP TRAINING</button><button id="trainingBackBtn" class="btn ghost" type="button">BACK</button><button id="trainingNextBtn" class="btn primary" type="button">CONTINUE</button></div>
+      </div>
+    </div>
+
+    <div id="matchmakingOverlay" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="matchmaking-console hud-panel">
+        <button class="modal-x" id="cancelMatchmakingBtn" type="button" aria-label="Cancel matchmaking">×</button>
+        <div class="radar-stage"><div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-sweep"></div><div class="radar-core">⌁</div></div>
+        <p class="kicker">GLOBAL MATCHMAKING</p>
+        <h2 id="matchmakingTitle">SEARCHING FOR OPERATORS</h2>
+        <div class="matchmaking-stats"><div><span>PLAYERS FOUND</span><b id="queuePlayers">1 / 4</b></div><div><span>QUEUE TIME</span><b id="queueTime">00:00</b></div><div><span>REGION</span><b id="queueRegion">AUTO</b></div></div>
+        <div id="botOffer" class="bot-offer hidden"><p>No complete human lobby yet. Continue searching or fill the remaining positions with AI operators.</p><div><button id="keepSearchingBtn" class="btn ghost" type="button">KEEP SEARCHING</button><button id="acceptBotBtn" class="btn primary" type="button">FILL WITH AI</button></div></div>
+      </div>
+    </div>
+
+    <div id="modeModal" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card hud-panel">
+        <button class="modal-x close-modal" type="button" data-close="modeModal">×</button>
+        <p class="kicker">QUICK MATCH</p><h2>Choose protocol</h2>
+        <div class="modal-mode-grid"><button data-queue-mode="classic" class="modal-mode" type="button"><b>CLASSIC</b><span>4 operators</span></button><button data-queue-mode="duel" class="modal-mode" type="button"><b>DUEL</b><span>1 vs 1</span></button><button data-queue-mode="teams" class="modal-mode" type="button"><b>TEAM BATTLE</b><span>2 vs 2</span></button></div>
+      </div>
+    </div>
+
+    <div id="botsModal" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card hud-panel">
+        <button class="modal-x close-modal" type="button" data-close="botsModal">×</button>
+        <p class="kicker">AI TRAINING ARENA</p><h2>Configure bot match</h2>
+        <div class="form-grid">
+          <label><span>GAME TYPE</span><select id="botsMode"><option value="classic">CLASSIC</option><option value="duel">DUEL</option><option value="teams">TEAM BATTLE</option></select></label>
+          <label><span>BOT COUNT</span><select id="botsCount"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></label>
+          <label class="wide"><span>DIFFICULTY</span><select id="botsDifficulty"><option value="rookie">ROOKIE</option><option value="standard" selected>STANDARD</option><option value="advanced">ADVANCED</option><option value="elite">ELITE</option><option value="nightmare">NIGHTMARE</option></select></label>
+        </div>
+        <div id="difficultyInfo" class="difficulty-info">STANDARD · balanced reasoning, defense, and target selection.</div>
+        <button id="launchBotMatchBtn" class="btn primary full" type="button">INITIALIZE AI MATCH</button>
+      </div>
+    </div>
+
+    <div id="privateModal" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card wide-modal hud-panel">
+        <button class="modal-x close-modal" type="button" data-close="privateModal">×</button>
+        <p class="kicker">PRIVATE CLASSROOM MATCH</p><h2>Create or join with code</h2>
+        <div class="private-grid">
+          <form id="createPrivateForm">
+            <h3>CREATE</h3>
+            <label><span>ROOM NAME</span><input id="roomName" value="Cyber Lab" maxlength="80" /></label>
+            <label><span>HANDLE</span><input id="playerHandle" maxlength="24" /></label>
+            <label><span>MODE</span><select id="privateMode"><option value="classic">CLASSIC</option><option value="duel">DUEL</option><option value="teams">TEAM BATTLE</option></select></label>
+            <button class="btn primary full" type="submit">CREATE PRIVATE ROOM</button>
+          </form>
+          <form id="joinPrivateForm">
+            <h3>JOIN</h3>
+            <label><span>ROOM CODE</span><input id="joinCode" maxlength="6" placeholder="ABC123" /></label>
+            <label><span>HANDLE</span><input id="joinHandle" maxlength="24" /></label>
+            <div class="join-hint">Room codes are only needed for private matches. Quick Match, Bots, and Solo Training require no code.</div>
+            <button class="btn secondary full" type="submit">JOIN ROOM</button>
+          </form>
+        </div>
+        <p id="privateError" class="error"></p>
+      </div>
+    </div>
+
+    <div id="profileModal" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="profile-modal hud-panel">
+        <button class="modal-x close-modal" type="button" data-close="profileModal">×</button>
+        <div class="profile-modal-head"><div class="profile-orb large"><span id="profileModalLevel">01</span></div><div><p class="kicker">OPERATOR DOSSIER</p><h2 id="profileModalHandle">Operator</h2><strong id="profileModalRank">SCRIPT KIDDIE</strong></div></div>
+        <div class="profile-xp"><div><span>ACCOUNT XP</span><b id="profileXpText">0 / 500</b></div><div class="xp-track"><i id="profileXpBar"></i></div></div>
+        <form id="handleForm" class="handle-form"><label><span>DISPLAY HANDLE</span><input id="profileHandleInput" maxlength="24" /></label><button class="btn secondary" type="submit">UPDATE</button></form>
+        <div id="profileStatsGrid" class="profile-stats-grid"></div>
+        <div class="profile-columns"><section><div class="panel-title"><span>ACHIEVEMENTS</span></div><div id="achievementGrid" class="achievement-grid"></div></section><section><div class="panel-title"><span>MATCH HISTORY</span></div><div id="historyList" class="history-list"></div></section></div>
+      </div>
+    </div>
+
+    <div id="guideModal" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="guide-modal hud-panel">
+        <button class="modal-x close-modal" type="button" data-close="guideModal">×</button>
+        <p class="kicker">COMMAND LIBRARY</p><h2>Simulator commands & operator tricks</h2>
+        <div id="commandGuide" class="command-guide"></div>
+      </div>
+    </div>
+
+    <div id="scanOverlay" class="overlay scan-overlay hidden" aria-live="polite">
+      <div class="scan-console">
+        <div class="scan-radar"><i></i><b>⌁</b></div>
+        <p class="kicker">SIMULATED CLASSROOM NODE</p>
+        <h2 id="scanTargetLabel">SCANNING NODE</h2>
+        <div class="scan-line"><span>PORT ENUMERATION [SIMULATED]</span><b id="scanPercent">0%</b></div>
+        <div class="scan-progress"><i id="scanProgressBar"></i></div>
+        <div id="scanStatus">Initializing diagnostic profile...</div>
+      </div>
+    </div>
+
+    <div id="introOverlay" class="overlay cinematic hidden">
+      <div id="introContent" class="intro-content"></div>
+    </div>
+
+    <div id="resultOverlay" class="overlay cinematic hidden" role="dialog" aria-modal="true">
+      <div class="result-console hud-panel">
+        <p class="kicker">MISSION COMPLETE</p><h1 id="resultTitle">VICTORY</h1><p id="resultSubtitle"></p>
+        <div id="resultStats" class="result-stats"></div>
+        <div class="result-xp"><span>ACCOUNT PROGRESSION</span><div class="xp-track"><i id="resultXpBar"></i></div><b id="resultXpText"></b></div>
+        <div class="result-actions"><button id="rematchBtn" class="btn secondary" type="button">REMATCH</button><button id="resultQuickBtn" class="btn primary" type="button">QUICK MATCH</button><button id="resultHomeBtn" class="btn ghost" type="button">COMMAND CENTER</button></div>
+      </div>
+    </div>
+
+    <aside id="zShieldDrawer" class="z-drawer" aria-hidden="true">
+      <div class="z-head"><div class="z-avatar">◉</div><div><b>Z-SHIELD AI</b><small>Ethical cyber mentor</small></div><button id="closeZShieldBtn" type="button">×</button></div>
+      <div id="zShieldContext" class="z-context">Select a challenge to activate contextual mentoring.</div>
+      <div class="z-actions"><button data-z-action="hint" type="button">ASK FOR HINT</button><button data-z-action="concept" type="button">EXPLAIN CONCEPT</button><button data-z-action="attempts" type="button">REVIEW MY ATTEMPTS</button><button data-z-action="look" type="button">WHAT SHOULD I LOOK AT?</button></div>
+      <div id="zShieldMessages" class="z-messages"><div class="z-message ai">I will guide your reasoning without revealing the exact answer.</div></div>
+      <form id="zShieldForm"><input id="zShieldInput" maxlength="500" placeholder="Ask about the current challenge..." /><button type="submit">SEND</button></form>
+    </aside>
+
+    <div id="debriefModal" class="overlay hidden" role="dialog" aria-modal="true">
+      <div class="debrief-card hud-panel">
+        <button class="modal-x close-modal" type="button" data-close="debriefModal">×</button>
+        <p class="kicker">ACCESS SIMULATION COMPLETE</p><h2>Defensive debrief</h2>
+        <div id="debriefContent" class="debrief-grid"></div>
+      </div>
+    </div>
+
+    <div id="levelUpOverlay" class="level-up hidden" aria-live="assertive"><div class="energy-ring"></div><span>LEVEL UP</span><b id="levelUpNumber">LEVEL 2</b><strong id="levelUpRank">SCRIPT KIDDIE</strong></div>
+    <div id="achievementToast" class="achievement-toast hidden"><span>ACHIEVEMENT UNLOCKED</span><b id="achievementToastName"></b><small id="achievementToastDesc"></small></div>
+    <div id="toast" class="toast hidden" aria-live="polite"></div>
   </div>
 
   <script src="config.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>
