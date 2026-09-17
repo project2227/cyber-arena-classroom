@@ -1,11 +1,11 @@
 {
   "name": "cyber-arena-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
-  "main": "server.js",
+  "main": "entry.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node entry.js",
+    "dev": "node --watch entry.js"
   },
   "engines": {
     "node": ">=20"
@@ -14,6 +14,7 @@
     "@socket.io/redis-adapter": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
@@ -21,7 +22,6 @@
     "pg": "^8.16.0",
     "redis": "^4.7.0",
     "socket.io": "^4.8.1",
-    "zod": "^3.25.0",
-    "dotenv": "^16.6.1"
+    "zod": "^3.25.0"
   }
 }
