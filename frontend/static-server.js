@@ -51,9 +51,7 @@ function sendFile(req, res, filePath) {
     setSecurityHeaders(res);
     res.statusCode = 200;
     res.setHeader('Content-Type', type);
-    res.setHeader('Cache-Control', ext === '.html' || path.basename(filePath) === 'config.js'
-      ? 'no-store, max-age=0'
-      : 'public, max-age=300');
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.setHeader('Content-Length', stat.size);
 
     if (req.method === 'HEAD') {
